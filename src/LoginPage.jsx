@@ -19,7 +19,7 @@ const LoginPage = () => {
     e.preventDefault();
     fetch("https://portal.mytasker.us/api/login", {
       method: "POST",
-      headers: { 'Content-Type': 'application/json', "X-API-KEY" : "mytasker@2023" },
+      headers: { 'Content-Type': 'application/json', "X-API-KEY" : process.env.REACT_APP_API_KEY },
       body: JSON.stringify(inputVal)
     })
     .then(res => res.json())

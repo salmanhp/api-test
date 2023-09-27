@@ -18,7 +18,7 @@ const Dashboard = () => {
     useEffect(() => {
         fetch("https://portal.mytasker.us/api/show_profile", {
             method: "POST",
-            headers: { 'Content-Type': 'application/json', "X-API-KEY" : "mytasker@2023" },
+            headers: { 'Content-Type': 'application/json', "X-API-KEY" : process.env.REACT_APP_API_KEY },
             body: JSON.stringify(loginDetails)
         })
         .then(res => res.json())
