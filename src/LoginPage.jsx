@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Avatar, Box, Button, Card, CardContent, TextField, Typography } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
-
+import React, { useState } from 'react';
+import { Box, Button, TextField } from '@mui/material';
+import { useLogin } from './ContextApi';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import Login from './Asset/login.jpg';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { setLoginDetails, loginDetails, setAuth } = useLogin();
+
   const [inputVal, setInputVal] = useState({
     username: "",
     password: ""
   });
 
-  const [loginDetails, setLoginDetails] = useState({
-    user_id : "",
-    sessiontoken: ""
-  });
-
-  const [userDetails, setUserDetails] = useState({});
   
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,91 +23,75 @@ const LoginPage = () => {
       body: JSON.stringify(inputVal)
     })
     .then(res => res.json())
-    .then(data => setLoginDetails({user_id: data.user_id, sessiontoken: data.sessiontoken}));
-  }
+    .then(data => {
+      setLoginDetails({user_id: data.user_id, sessiontoken: data.sessiontoken});
+      data.responsecode === "200" && setAuth(true);
+      data.responsecode === "200" && Cookies.set('user_id', loginDetails.user_id);
+      data.responsecode === "200" && Cookies.set('sessiontoken', loginDetails.sessiontoken);
+      data.responsecode === "200" ? navigate("/dashboard") : navigate("/login");
+    });
 
+  }
+  
 
   const handleChange = (e) => {
     const{ name, value } = e.target;
     setInputVal({...inputVal, [name]: value});
   }
 
-  useEffect(() => {
-    fetch("https://portal.mytasker.us/api/show_profile", {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json', "X-API-KEY" : "mytasker@2023" },
-      body: JSON.stringify(loginDetails)
-    })
-    .then(res => res.json())
-    .then(userDetail => setUserDetails(userDetail))
-  }, [loginDetails]);
-
-
+  
   return (
     <>
-    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px'}}>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          '& .MuiTextField-root': { m: 1, width: '25ch' },
-          boxShadow: 3,
-          width: '30%',
-          textAlign: 'center',
-          paddingY: '20px'
-        }}
-      >
-        
-        <div>
-          <TextField
-            name='username'
-            type='text'
-            onChange={handleChange} 
-            value={inputVal.username}
-            label="User Name"
-            style = {{width: '400px'}}
-            autoComplete='off'
-          />
-        </div>
-        <div>
-          <TextField
-            name='password'
-            type='password'
-            onChange={handleChange} 
-            value={inputVal.password}
-            label="Password"
-            style = {{width: '400px'}}
-            autoComplete='off'
-          />
-        </div>
-        <Button type='submit' variant="contained" style = {{width: '400px', marginTop: '20px'}} >Login</Button>
-      </Box>
-    </div>
-
-    
-    <Box 
-      component="div"
-      style={{
-        marginTop: '5%',
-        display: "flex",
-        justifyContent: 'center',
-      }}
-    >
-      <Card sx={{width: '30%'}}>
-        <CardContent sx={{ alignItems: 'center', textAlign: 'center' }}>
-          <Avatar sx={{ position: 'relative', left: '50%', transform: 'Translate(-50%)', marginBottom: '9px' }}>
-            <AccountCircle fontSize='large' />
-          </Avatar>
+    <Box sx={{height: '95vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+      <Box sx={{boxShadow: 3, display: 'flex', width: '70%', height: '70vh' }}>
+        <Box sx={{ width: '50%'}}>
+          <img style={{width: '100%', height: '100%'}} src={Login} alt="login" />
+        </Box>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            '& .MuiTextField-root': { m: 1, width: '20ch', bgcolor: 'white' },
+            width: '50%',
+            textAlign: 'center',
+            paddingY: '20px',
+            bgcolor: '#D169CA',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
           
-          <Box sx={{ textAlign: 'start', paddingLeft: '30%', marginTop: '10px'}}>
-            <Typography variant='h6'>ID: {userDetails?.user_id}</Typography>
-            <Typography variant='h6'>Name: {userDetails?.user_salute} {userDetails?.user_first_name} {userDetails?.user_last_name}</Typography>
-            <Typography variant='h6'>Email: {userDetails?.user_email}</Typography>
-            <Typography variant='h6'>Mobile No: {userDetails?.user_mobile}</Typography>
-          </Box>
-        </CardContent>
-      </Card>
+          <div>
+            <TextField
+              required
+              name='username'
+              type='text'
+              onChange={handleChange} 
+              value={inputVal.username}
+              label="User Name"
+              style = {{width: '400px'}}
+              autoComplete='off'
+            />
+          </div>
+          <div>
+            <TextField
+              required
+              name='password'
+              type='password'
+              onChange={handleChange} 
+              value={inputVal.password}
+              label="Password"
+              style = {{width: '400px'}}
+              autoComplete='off'
+            />
+          </div>
+          <Button type='submit' variant="contained" style = {{width: '400px', marginTop: '20px'}} >Login</Button>
+        </Box>
+      </Box>
     </Box>
+
   </>
   )
 }
